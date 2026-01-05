@@ -19,16 +19,25 @@ export interface CertificateData {
   expireDate?: string;
 }
 
-registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+const fontDir = path.join(
+  __dirname,
+  '..', // services
+  '..', // common
+  '..', // src (dev) | dist (prod)
+  'assets',
+  'fonts',
+);
+
+registerFont(path.join(fontDir, 'NotoSans.ttf'), {
   family: 'NotoSans',
 });
 
-registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+registerFont(path.join(fontDir, 'NotoSans.ttf'), {
   family: 'NotoSans',
   weight: 'bold',
 });
 
-registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+registerFont(path.join(fontDir, 'NotoSans.ttf'), {
   family: 'NotoSans',
   style: 'italic',
 });
