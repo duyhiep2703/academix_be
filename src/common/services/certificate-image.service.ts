@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { createCanvas, CanvasRenderingContext2D, loadImage } from 'canvas';
+import {
+  createCanvas,
+  registerFont,
+  CanvasRenderingContext2D,
+  loadImage,
+} from 'canvas';
+import path from 'path';
 
 export interface CertificateData {
   studentName: string;
@@ -12,6 +18,20 @@ export interface CertificateData {
   identifyNumber?: string;
   expireDate?: string;
 }
+
+registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+  family: 'NotoSans',
+});
+
+registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+  family: 'NotoSans',
+  weight: 'bold',
+});
+
+registerFont(path.join(process.cwd(), 'fonts/NotoSans.ttf'), {
+  family: 'NotoSans',
+  style: 'italic',
+});
 
 @Injectable()
 export class CertificateImageService {
@@ -141,7 +161,7 @@ export class CertificateImageService {
 
     // Main title - formal serif font
     ctx.fillStyle = '#1A1A1A'; // Deep black for professional look
-    ctx.font = 'bold 56px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 56px NotoSans';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText('CERTIFICATE OF COMPLETION', centerX, currentY);
@@ -149,13 +169,13 @@ export class CertificateImageService {
 
     // Institution name - elegant serif
     ctx.fillStyle = '#D4AF37'; // Gold color
-    ctx.font = 'bold 32px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 32px "NotoSans", "Times", serif';
     ctx.fillText('ACADEMIX INSTITUTE', centerX, currentY);
     currentY += 50;
 
     // Formal certification statement
     ctx.fillStyle = '#4A4A4A'; // Dark gray
-    ctx.font = 'italic 26px "Georgia", "Times New Roman", serif';
+    ctx.font = 'italic 26px "Georgia", "NotoSans", serif';
     ctx.fillText('This is to certify that', centerX, currentY);
   }
 
@@ -253,7 +273,7 @@ export class CertificateImageService {
 
     // Student name - prominent formal serif
     ctx.fillStyle = '#1A1A1A';
-    ctx.font = 'bold 58px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 58px "NotoSans", "Times", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText(data.studentName, centerX, currentY);
@@ -261,26 +281,26 @@ export class CertificateImageService {
 
     // Course completion text - formal serif
     ctx.fillStyle = '#4A4A4A';
-    ctx.font = '28px "Georgia", "Times New Roman", serif';
+    ctx.font = '28px "Georgia", "NotoSans", serif';
     ctx.fillText('has successfully completed the course', centerX, currentY);
     currentY += 60;
 
     // Course name - bold serif
     ctx.fillStyle = '#2C2C2C';
-    ctx.font = 'bold 42px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 42px "NotoSans", "Times", serif';
     ctx.fillText(`"${data.courseName}"`, centerX, currentY);
     currentY += 70;
 
     // Exam title - formal serif
     ctx.fillStyle = '#5A5A5A';
-    ctx.font = '24px "Georgia", "Times New Roman", serif';
+    ctx.font = '24px "Georgia", "NotoSans", serif';
     ctx.fillText(`Examination: ${data.examTitle}`, centerX, currentY);
     currentY += 50;
 
     // Identification Number - if available
     if (data.identifyNumber) {
       ctx.fillStyle = '#4A4A4A';
-      ctx.font = '22px "Georgia", "Times New Roman", serif';
+      ctx.font = '22px "Georgia", "NotoSans", serif';
       ctx.fillText(
         `Identification Number: ${data.identifyNumber}`,
         centerX,
@@ -292,14 +312,14 @@ export class CertificateImageService {
     // Expire date - if available
     if (data.expireDate) {
       ctx.fillStyle = '#5A5A5A';
-      ctx.font = '20px "Georgia", "Times New Roman", serif';
+      ctx.font = '20px "Georgia", "NotoSans", serif';
       ctx.fillText(`Valid until: ${data.expireDate}`, centerX, currentY);
       currentY += 50;
     }
 
     // Score - elegant presentation
     ctx.fillStyle = '#2C2C2C';
-    ctx.font = '26px "Georgia", "Times New Roman", serif';
+    ctx.font = '26px "Georgia", "NotoSans", serif';
     const scoreText = `Achieved Score: ${data.score.toFixed(1)}%`;
     ctx.fillText(scoreText, centerX, currentY);
   }
@@ -345,14 +365,14 @@ export class CertificateImageService {
     // Score text - formal serif
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#1A1A1A';
-    ctx.font = 'bold 36px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 36px "NotoSans", "Times", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`${score.toFixed(0)}%`, sealX, sealY - 8);
 
     // Excellence label - formal serif
     ctx.fillStyle = '#8B6914'; // Dark gold
-    ctx.font = 'bold 16px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 16px "NotoSans", "Times", serif';
     ctx.fillText('EXCELLENCE', sealX, sealY + 20);
 
     ctx.restore();
@@ -378,13 +398,13 @@ export class CertificateImageService {
 
     ctx.textAlign = 'left';
     ctx.fillStyle = '#4A4A4A';
-    ctx.font = '18px "Georgia", "Times New Roman", serif';
+    ctx.font = '18px "Georgia", "NotoSans", serif';
     ctx.fillText('Authorized Signature', leftX, signatureY + 25);
 
     // Right side - Certificate ID
     ctx.textAlign = 'right';
     ctx.fillStyle = '#5A5A5A';
-    ctx.font = '16px "Georgia", "Times New Roman", serif';
+    ctx.font = '16px "Georgia", "NotoSans", serif';
     const certIdText = data.certificateId
       ? `Certificate ID: ${data.certificateId}`
       : 'Academix Education Platform';
@@ -400,11 +420,11 @@ export class CertificateImageService {
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#5A5A5A';
-    ctx.font = '20px "Georgia", "Times New Roman", serif';
+    ctx.font = '20px "Georgia", "NotoSans", serif';
     ctx.fillText(`Issued on ${data.issuedDate}`, centerX, footerY);
 
     ctx.fillStyle = '#D4AF37'; // Gold color
-    ctx.font = 'bold 24px "Times New Roman", "Times", serif';
+    ctx.font = 'bold 24px "NotoSans", "Times", serif';
     ctx.fillText('Academix Education Platform', centerX, footerY + 35);
   }
 }
