@@ -36,6 +36,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import { createHash, randomBytes } from 'crypto';
 import type { AxiosResponse } from 'axios';
+import { Wallet } from 'ethers';
 
 interface PasswordResetRequestContext {
   ip?: string | string[];
@@ -89,6 +90,25 @@ export class AuthService {
     // Hash password
     const passwordHash = await argon2.hash(password);
 
+    // Generate wallet address for students
+    let walletAddress: string | undefined;
+    if (role === 'student') {
+      try {
+        const wallet = Wallet.createRandom();
+        walletAddress = wallet.address;
+        this.logger.log(
+          `Generated wallet address for student ${username}: ${walletAddress}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to generate wallet address for student ${username}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+        // Continue without wallet address if generation fails
+        // The user can still be created, wallet can be added later
+      }
+    }
+
     // Create user with role from request
     const newUser = new this.userModel({
       username,
@@ -96,6 +116,7 @@ export class AuthService {
       email,
       passwordHash,
       role,
+      walletAddress,
     });
 
     const savedUser = await newUser.save();
