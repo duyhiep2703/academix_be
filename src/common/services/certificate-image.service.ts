@@ -1,10 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  createCanvas,
-  registerFont,
-  CanvasRenderingContext2D,
-  loadImage,
-} from 'canvas';
+import type { CanvasRenderingContext2D } from 'canvas';
 import path from 'path';
 
 export interface CertificateData {
@@ -19,34 +14,44 @@ export interface CertificateData {
   expireDate?: string;
 }
 
-const fontDir = path.join(
-  __dirname,
-  '..', // services
-  '..', // common
-  '..', // src (dev) | dist (prod)
-  'assets',
-  'fonts',
-);
-
-registerFont(path.join(fontDir, 'NotoSans.ttf'), {
-  family: 'NotoSans',
-});
-
-registerFont(path.join(fontDir, 'NotoSans.ttf'), {
-  family: 'NotoSans',
-  weight: 'bold',
-});
-
-registerFont(path.join(fontDir, 'NotoSans.ttf'), {
-  family: 'NotoSans',
-  style: 'italic',
-});
-
 @Injectable()
 export class CertificateImageService {
   private readonly logger = new Logger(CertificateImageService.name);
   private readonly width = 1200;
   private readonly height = 800;
+  private canvasModule: typeof import('canvas') | null = null;
+  private fontsRegistered = false;
+
+  /** Loads native `canvas` only when needed (avoids crashing serverless cold start). */
+  private async ensureCanvasModule(): Promise<typeof import('canvas')> {
+    if (!this.canvasModule) {
+      this.canvasModule = await import('canvas');
+    }
+    if (!this.fontsRegistered) {
+      const { registerFont } = this.canvasModule;
+      const fontDir = path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'assets',
+        'fonts',
+      );
+      registerFont(path.join(fontDir, 'NotoSans.ttf'), {
+        family: 'NotoSans',
+      });
+      registerFont(path.join(fontDir, 'NotoSans.ttf'), {
+        family: 'NotoSans',
+        weight: 'bold',
+      });
+      registerFont(path.join(fontDir, 'NotoSans.ttf'), {
+        family: 'NotoSans',
+        style: 'italic',
+      });
+      this.fontsRegistered = true;
+    }
+    return this.canvasModule;
+  }
 
   /**
    * Tạo ảnh certificate từ dữ liệu
@@ -55,6 +60,7 @@ export class CertificateImageService {
    */
   async generateCertificateImage(data: CertificateData): Promise<Buffer> {
     try {
+      const { createCanvas } = await this.ensureCanvasModule();
       const canvas = createCanvas(this.width, this.height);
       const ctx = canvas.getContext('2d');
 
@@ -203,6 +209,7 @@ export class CertificateImageService {
     }
 
     try {
+      const { loadImage } = await this.ensureCanvasModule();
       // Load ảnh từ URL
       const img = await loadImage(data.studentImageUrl);
 

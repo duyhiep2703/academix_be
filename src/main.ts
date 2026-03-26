@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import type { INestApplication } from '@nestjs/common';
 import type { Response } from 'express';
 import helmet from 'helmet';
 import { IoAdapter } from '@nestjs/platform-socket.io';
@@ -10,8 +11,7 @@ import { GlobalValidationPipe } from './common/pipes/validation.pipe';
 import { ResponseHelper } from './common/dto/response.dto';
 import { json, urlencoded } from 'express';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+export async function configureApp(app: INestApplication): Promise<void> {
   const configService = app.get(ConfigService);
 
   app.useWebSocketAdapter(new IoAdapter(app));
@@ -71,7 +71,17 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+}
 
+export async function createNestApp(): Promise<INestApplication> {
+  const app = await NestFactory.create(AppModule);
+  await configureApp(app);
+  return app;
+}
+
+async function bootstrap() {
+  const app = await createNestApp();
+  const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port') || 8000;
   await app.listen(port);
 
@@ -82,4 +92,6 @@ async function bootstrap() {
   );
 }
 
-void bootstrap();
+if (require.main === module) {
+  void bootstrap();
+}
